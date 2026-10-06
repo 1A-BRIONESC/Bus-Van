@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Abra–Mamburao Bus & Van Tracker</title>
+<style>
+:root{--bg:#f4f6f8;--card:#fff;--ink:#14212b;--mute:#5d6d7a;--line:#dde3e8;--brand:#0b6e4f;--bus:#e07a00;--van:#2563eb;--sea:#d7ebf7;--land:#eef3e6;--road:#8a97a3;--err:#c0262d}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e151b;--card:#17212a;--ink:#e8eef3;--mute:#9bacb9;--line:#2a3742;--brand:#3ddc97;--bus:#ffa63d;--van:#6ea1ff;--sea:#12283a;--land:#1a2620;--road:#5d6d7a;--err:#ff7b80}}
+:root[data-theme="dark"]{--bg:#0e151b;--card:#17212a;--ink:#e8eef3;--mute:#9bacb9;--line:#2a3742;--brand:#3ddc97;--bus:#ffa63d;--van:#6ea1ff;--sea:#12283a;--land:#1a2620;--road:#5d6d7a;--err:#ff7b80}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.4}
+#app{display:none}body.authed #app{display:block}body.authed #login{display:none}
+/* login */
+#login{min-height:100vh;display:grid;place-items:center;padding:16px;background:linear-gradient(160deg,var(--brand),#0a3d5c)}
+.box{background:var(--card);border-radius:16px;padding:22px;width:100%;max-width:380px;box-shadow:0 10px 40px rgba(0,0,0,.3)}
+.box h1{margin:0 0 2px;font-size:1.25rem}.box p{margin:0 0 14px;color:var(--mute);font-size:.88rem}
+.tabs{display:flex;gap:6px;margin-bottom:12px}.tabs button{flex:1;padding:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;cursor:pointer}
+.tabs button.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+label{display:block;font-size:.8rem;color:var(--mute);margin:10px 0 3px}
+input{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font-size:1rem}
+.primary{width:100%;margin-top:14px;padding:11px;border:0;border-radius:8px;background:var(--brand);color:#fff;font-size:1rem;cursor:pointer}
+.demo{margin-top:12px;padding:10px;border:1px dashed var(--brand);border-radius:8px;font-size:.85rem}
+.demo button{margin-top:6px;padding:6px 10px;border:1px solid var(--brand);background:none;color:var(--brand);border-radius:6px;cursor:pointer}
+#err{color:var(--err);font-size:.85rem;min-height:1.2em;margin-top:8px}
+/* app */
+header{background:var(--brand);color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+header h1{margin:0;font-size:1.1rem}header small{opacity:.85;display:block;font-weight:400}
+header .r{display:flex;gap:8px;align-items:center;font-size:.85rem}
+header button{background:rgba(255,255,255,.2);color:#fff;border:0;border-radius:8px;padding:8px 10px;cursor:pointer}
+main{display:grid;gap:14px;padding:14px;max-width:1100px;margin:auto;grid-template-columns:1fr}
+@media(min-width:860px){main{grid-template-columns:minmax(0,1fr) 380px}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+.filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.filters button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:20px;padding:6px 12px;cursor:pointer;font-size:.85rem}
+.filters button.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+svg{width:100%;height:auto;max-height:70vh;display:block;border-radius:10px;background:var(--land)}
+.note{font-size:.78rem;color:var(--mute);margin:8px 2px 0}
+.list{display:grid;gap:8px;max-height:560px;overflow:auto}
+.v{border:1px solid var(--line);border-left:5px solid var(--bus);border-radius:10px;padding:10px;cursor:pointer;background:var(--card)}
+.v.van{border-left-color:var(--van)}.v.sel{outline:2px solid var(--brand)}
+.v b{display:flex;justify-content:space-between}.v span{color:var(--mute);font-size:.82rem}
+.bar{height:6px;background:var(--line);border-radius:4px;margin-top:6px;overflow:hidden}.bar i{display:block;height:100%;background:var(--brand)}
+.info{margin-bottom:12px;border-color:var(--brand)}.info h2{margin:0 0 4px;font-size:1rem}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:.88rem;margin-top:6px}
+.grid div{background:var(--bg);border-radius:8px;padding:6px 8px}.grid em{display:block;font-style:normal;color:var(--mute);font-size:.72rem}
+.fare{font-size:.85rem;color:var(--mute);margin-top:10px}
+</style>
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<div id="login">
+  <div class="box">
+    <h1>🚌 Abra–Mamburao Tracker</h1>
+    <p>Bus & Van transport · Sign in to track vehicles</p>
+    <div class="tabs"><button id="tSign" class="on">Sign in</button><button id="tReg">Create account</button></div>
+    <label for="u">Username</label><input id="u" autocomplete="username">
+    <label for="p">Password</label><input id="p" type="password" autocomplete="current-password">
+    <div id="regExtra" hidden><label for="p2">Confirm password</label><input id="p2" type="password"></div>
+    <div id="err" role="alert"></div>
+    <button class="primary" id="go">Sign in</button>
+    <div class="demo">Demo account: <b>demo</b> / <b>demo123</b><br><button id="fill" type="button">Fill demo login</button></div>
+  </div>
+</div>
+
+<!-- TRACKER APP -->
+<div id="app">
+<header>
+  <div><h1>🚌 Abra–Mamburao Tracker<small>Abra de Ilog ⇄ Mamburao, Occidental Mindoro</small></h1></div>
+  <div class="r"><span id="who"></span><button id="theme" aria-label="Toggle theme">🌓</button><button id="out">Log out</button></div>
+</header>
+<main>
+<section class="card">
+  <div class="filters" id="filters">
+    <button data-f="all" class="on">All</button><button data-f="bus">🚌 Buses</button><button data-f="van">🚐 Vans</button>
+    <button data-d="1">Abra → Mamburao</button><button data-d="-1">Mamburao → Abra</button>
+  </div>
+  <svg id="map" viewBox="0 0 400 560" role="img" aria-label="Route map">
+    <path d="M0 0H130C150 120 60 260 90 400C100 470 70 520 80 560H0Z" fill="var(--sea)"/>
+    <text x="20" y="300" fill="var(--mute)" font-size="12" transform="rotate(-90 20 300)">Occidental Mindoro</text>
+    <path id="route" d="M300 40C280 120 200 140 210 220S120 320 140 400S150 500 170 520" fill="none" stroke="var(--road)" stroke-width="7" stroke-linecap="round"/>
+    <g id="stops"></g><g id="vehicles"></g>
+  </svg>
+</section>
+<section>
+  <div class="card info" id="info"><h2>Select a vehicle</h2><span style="color:var(--mute);font-size:.88rem">Tap a bus or van on the map or in the list to see its details.</span></div>
+  <div class="card"><div class="list" id="list"></div>
+    <div class="fare">Tickets: Bus ₱50–75, Van ₱100–120</div></div>
+</section>
+</main>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+/* ---------- AUTH (demo only: stored in this browser's localStorage) ---------- */
+const UK='amt_users',SK='amt_session';
+async function hash(s){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch(e){let h=5381;for(const c of s)h=(h*33)^c.charCodeAt(0);return'w'+(h>>>0).toString(16)}}
+const users=()=>{try{return JSON.parse(localStorage.getItem(UK))||{}}catch(e){return{}}};
+const saveUsers=u=>{try{localStorage.setItem(UK,JSON.stringify(u))}catch(e){}};
+async function seedDemo(){const u=users();if(!u.demo){u.demo=await hash('demo123');saveUsers(u)}}
+let mode='sign';
+function setMode(m){mode=m;$('tSign').classList.toggle('on',m=='sign');$('tReg').classList.toggle('on',m=='reg');
+ $('regExtra').hidden=m!='reg';$('go').textContent=m=='sign'?'Sign in':'Create account';$('err').textContent=''}
+$('tSign').onclick=()=>setMode('sign');$('tReg').onclick=()=>setMode('reg');
+$('fill').onclick=()=>{setMode('sign');$('u').value='demo';$('p').value='demo123'};
+$('go').onclick=async()=>{
+ const name=$('u').value.trim().toLowerCase(),pw=$('p').value,u=users();
+ if(!name||!pw)return $('err').textContent='Enter a username and password.';
+ const h=await hash(pw);
+ if(mode=='reg'){
+  if(name.length<3)return $('err').textContent='Username must be at least 3 characters.';
+  if(pw.length<6)return $('err').textContent='Password must be at least 6 characters.';
+  if(pw!==$('p2').value)return $('err').textContent='Passwords do not match.';
+  if(u[name])return $('err').textContent='That username is taken.';
+  u[name]=h;saveUsers(u);
+ }else if(u[name]!==h)return $('err').textContent='Wrong username or password.';
+ try{localStorage.setItem(SK,name)}catch(e){}
+ enter(name)};
+['u','p','p2'].forEach(i=>$(i).addEventListener('keydown',e=>{if(e.key=='Enter')$('go').click()}));
+$('out').onclick=()=>{try{localStorage.removeItem(SK)}catch(e){}document.body.classList.remove('authed');$('p').value='';setMode('sign')};
+$('theme').onclick=()=>{const r=document.documentElement,d=r.dataset.theme=='dark'||(!r.dataset.theme&&matchMedia('(prefers-color-scheme:dark)').matches);r.dataset.theme=d?'light':'dark'};
+
+/* ---------- TRACKER ---------- */
+const KM=34,NS='http://www.w3.org/2000/svg';
+const stops=[{n:'Abra de Ilog Port',t:0},{n:'Balao',t:.22},{n:'Cabacao',t:.48},{n:'Tangkalan',t:.76},{n:'Mamburao Terminal',t:1}];
+const names=['RoRo Bus','UV Express','RoRo Bus','UV Express','RoRo Bus','UV Express'];
+let vs=names.map((n,i)=>({id:i,type:i%2?'van':'bus',name:n,plate:'MAB '+(1000+i*371%9000),t:(i+.5)/7,dir:i%3?1:-1,speed:35+i*5,seats:i%2?15:45,load:Math.round((i%2?15:45)*(.3+.1*i%.6))}));
+let filter='all',dirF=0,sel=null,path,L,started=false;
+const pt=t=>path.getPointAtLength(t*L);
+function getFeed(){/* Replace with fetch('/api/vehicles') returning [{id,t,dir,speed}] for real GPS data */return null}
+function initMap(){
+ path=$('route');L=path.getTotalLength();
+ stops.forEach(s=>{const p=pt(s.t),g=document.createElementNS(NS,'g');
+  g.innerHTML=`<circle cx="${p.x}" cy="${p.y}" r="7" fill="var(--card)" stroke="var(--brand)" stroke-width="3"/><text x="${p.x+12}" y="${p.y+4}" font-size="11" fill="var(--ink)">${s.n}</text>`;$('stops').appendChild(g)});
+ vs.forEach(v=>{const g=document.createElementNS(NS,'g');g.style.cursor='pointer';
+  g.innerHTML=`<circle r="15" fill="${v.type=='bus'?'var(--bus)':'var(--van)'}" stroke="#fff" stroke-width="2"/><text text-anchor="middle" y="5" font-size="15">${v.type=='bus'?'🚌':'🚐'}</text>`;
+  g.onclick=()=>{sel=v.id;render()};v.el=g;$('vehicles').appendChild(g)});
+ setInterval(tick,100);setInterval(render,1000);
+}
+const visible=v=>(filter=='all'||v.type==filter)&&(!dirF||v.dir==dirF);
+const nextStop=v=>(v.dir>0?stops.find(s=>s.t>v.t):[...stops].reverse().find(s=>s.t<v.t))||stops[v.dir>0?4:0];
+function tick(){
+ vs.forEach(v=>{v.speed=Math.max(20,Math.min(70,v.speed+(Math.random()-.5)*4));
+  v.t+=v.dir*(v.speed/3600*.1*40)/KM;if(v.t>=1){v.t=1;v.dir=-1}if(v.t<=0){v.t=0;v.dir=1}
+  const p=pt(v.t);v.el.setAttribute('transform',`translate(${p.x},${p.y})`);
+  v.el.style.display=visible(v)?'':'none';v.el.firstChild.setAttribute('stroke',v.id===sel?'#000':'#fff')})}
+const eta=v=>{const s=nextStop(v);return Math.max(1,Math.round(Math.abs(s.t-v.t)*KM/v.speed*60))};
+function render(){
+ $('list').innerHTML=vs.filter(visible).map(v=>`<div class="v ${v.type} ${v.id===sel?'sel':''}" onclick="sel=${v.id};render()">
+  <b><span style="color:var(--ink)">${v.type=='bus'?'🚌':'🚐'} ${v.name}</span><span>${Math.round(v.speed)} km/h</span></b>
+  <span>${v.plate} · ${v.dir>0?'to Mamburao':'to Abra de Ilog'} · next: ${nextStop(v).n} (~${eta(v)} min)</span>
+  <div class="bar"><i style="width:${v.load/v.seats*100}%"></i></div></div>`).join('')||'<span>No vehicles match.</span>';
+ const v=vs[sel];if(v){const dest=v.dir>0?stops[4]:stops[0],rem=Math.abs(dest.t-v.t)*KM;
+  $('info').innerHTML=`<h2>${v.type=='bus'?'🚌':'🚐'} ${v.name} <small style="color:var(--mute)">${v.plate}</small></h2>
+  <div class="grid"><div><em>Heading</em>${dest.n}</div><div><em>Next stop</em>${nextStop(v).n}</div>
+  <div><em>Speed</em>${Math.round(v.speed)} km/h</div><div><em>Distance left</em>${rem.toFixed(1)} km</div>
+  <div><em>ETA to destination</em>${Math.max(1,Math.round(rem/v.speed*60))} min</div><div><em>Seats</em>${v.seats-v.load} free of ${v.seats}</div></div>`}}
+document.querySelectorAll('#filters button').forEach(b=>b.onclick=()=>{
+ if(b.dataset.f){filter=b.dataset.f;dirF=0}else dirF=dirF==+b.dataset.d?0:+b.dataset.d;
+ document.querySelectorAll('#filters button').forEach(x=>x.classList.toggle('on',x.dataset.f?x.dataset.f==filter&&!dirF:+x.dataset.d==dirF));render()});
+function enter(name){
+ $('who').textContent='👤 '+name;document.body.classList.add('authed');
+ if(!started){started=true;initMap();tick()}render()}
+
+/* ---------- START ---------- */
+seedDemo().then(()=>{let s=null;try{s=localStorage.getItem(SK)}catch(e){}if(s&&users()[s])enter(s)});
+</script>
+</body>
+</html>
